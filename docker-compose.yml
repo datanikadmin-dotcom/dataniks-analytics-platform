@@ -1,0 +1,77 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DataNiks Unified Analytics Platform — local dev stack
+#
+# Services:
+#   airflow-init    — one-shot DB init
+#   airflow-web     — Airflow web UI  (port 8081)
+#   airflow-sched   — Airflow scheduler
+#   webhook         — FastAPI webhook ingestion server (port 8080)
+#
+# Usage:
+#   docker compose up airflow-web airflow-sched webhook
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-airflow-common: &airflow-common
+  image: apache/airflow:2.9.3-python3.11
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    AIRFLOW__WEBSERVER__SECRET_KEY: "local-dev-secret-change-in-prod"
+    ENVIRONMENT: development
+  env_file: .env
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./airflow/plugins:/opt/airflow/plugins
+    - ./airflow/logs:/opt/airflow/logs
+    - ./data:/opt/airflow/data
+    - ./config:/opt/airflow/config
+    - .:/opt/platform          # full repo available inside containers
+
+services:
+
+  airflow-init:
+    <<: *airflow-common
+    command: db init
+    restart: "no"
+
+  airflow-web:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - "8081:8080"
+    depends_on:
+      - airflow-init
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  airflow-sched:
+    <<: *airflow-common
+    command: scheduler
+    depends_on:
+      - airflow-init
+    restart: unless-stopped
+
+  webhook:
+    build:
+      context: .
+      dockerfile: ingestion/webhooks/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
