@@ -1,0 +1,77 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Source-system connectors.
+# Change `provider` to swap from mock → real connector without code changes.
+# ─────────────────────────────────────────────────────────────────────────────
+
+sources:
+
+  commerce:
+    provider: mock              # mock | shopify | woocommerce | magento
+    # --- shopify example ---
+    # shop_domain: your-store.myshopify.com
+    # api_version: "2024-01"
+    # access_token: ${SHOPIFY_ACCESS_TOKEN}
+    enabled: true
+    batch_size: 250
+    incremental_field: updated_at
+
+  payments:
+    provider: mock              # mock | stripe | paypal | square
+    # --- stripe example ---
+    # secret_key: ${STRIPE_SECRET_KEY}
+    enabled: true
+    batch_size: 100
+    incremental_field: created
+
+  crm:
+    provider: mock              # mock | hubspot | salesforce
+    # --- hubspot example ---
+    # api_key: ${HUBSPOT_API_KEY}
+    # portal_id: ${HUBSPOT_PORTAL_ID}
+    enabled: true
+    batch_size: 500
+    incremental_field: lastmodifieddate
+
+  advertising:
+    providers:
+      - name: google_ads
+        provider: mock          # mock | google_ads
+        enabled: true
+        # developer_token: ${GOOGLE_ADS_DEVELOPER_TOKEN}
+        # customer_id: ${GOOGLE_ADS_CUSTOMER_ID}
+      - name: meta_ads
+        provider: mock          # mock | meta_ads
+        enabled: true
+        # app_id: ${META_APP_ID}
+        # app_secret: ${META_APP_SECRET}
+        # access_token: ${META_ACCESS_TOKEN}
+
+  inventory:
+    provider: mock              # mock | netsuite | fishbowl
+    enabled: true
+    batch_size: 1000
+    incremental_field: date
+
+  fulfillment:
+    provider: mock              # mock | shipbob | shipstation | easypost
+    enabled: true
+    batch_size: 250
+    incremental_field: updated_at
+
+# ── Webhook ingestion ──────────────────────────────────────────────────────
+webhooks:
+  enabled: true
+  host: ${WEBHOOK_HOST}
+  port: ${WEBHOOK_PORT}
+  secret: ${WEBHOOK_SECRET}
+  events:
+    - order.created
+    - order.updated
+    - order.cancelled
+    - payment.completed
+    - payment.failed
+    - payment.refunded
+    - inventory.updated
+    - shipment.created
+    - shipment.updated
+    - shipment.delivered

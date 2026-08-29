@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Client configuration — swap these values when onboarding a real client.
+# All platform behaviour is driven from this file; no code changes required.
+# ─────────────────────────────────────────────────────────────────────────────
+
+client:
+  name: NovaCommerce
+  slug: novacommerce           # used as dataset/schema prefix
+  industry: ecommerce
+  currency: USD
+  timezone: America/New_York
+  fiscal_year_start_month: 1   # January
+
+warehouse:
+  provider: duckdb             # duckdb (dev) | bigquery (prod)
+  # BigQuery overrides (only used when provider=bigquery)
+  gcp_project: ${GCP_PROJECT_ID}
+  location: ${BQ_LOCATION}
+  datasets:
+    raw: ${BQ_DATASET_RAW}
+    staging: ${BQ_DATASET_STAGING}
+    intermediate: ${BQ_DATASET_INTERMEDIATE}
+    marts: ${BQ_DATASET_MARTS}
+  # DuckDB override (dev/CI)
+  duckdb_path: ${DUCKDB_PATH}
+
+bi:
+  provider: powerbi
+  workspace: NovaCommerce Analytics
+  # pbix_path: powerbi/NovaCommerce.pbix   # uncomment if publishing PBIX
+
+ai:
+  provider: ${AI_PROVIDER}     # mock | anthropic | openai
+  model: ${AI_MODEL}
+  max_tokens: 2048
+  temperature: 0.0             # deterministic answers for analytics
+  read_only: true              # enforce SELECT-only SQL
+
+reconciliation:
+  match_threshold_usd: ${RECON_MATCH_THRESHOLD}
+  warn_threshold_usd: ${RECON_WARN_THRESHOLD}
+
+notifications:
+  slack_webhook: ${SLACK_WEBHOOK_URL}
+  alert_email: ${ALERT_EMAIL}
