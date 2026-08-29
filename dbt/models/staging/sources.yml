@@ -1,0 +1,85 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: Raw ingested data from all source systems.
+    tables:
+      - name: raw_customers
+        description: Customers loaded from the commerce connector.
+        columns:
+          - name: customer_id
+            tests: [not_null]
+          - name: email
+            data_tests:
+              - not_null:
+                  config:
+                    severity: warn    # raw may have nulls; staging cleans them
+
+      - name: raw_products
+        description: Product catalog from the commerce connector.
+        columns:
+          - name: product_id
+            tests: [not_null, unique]
+          - name: list_price
+            tests: [not_null]
+
+      - name: raw_orders
+        description: Orders from the commerce connector (may include duplicates before staging).
+        columns:
+          - name: order_id
+            tests: [not_null]
+          - name: customer_id
+            tests: [not_null]
+          - name: order_date
+            tests: [not_null]
+
+      - name: raw_order_items
+        description: Line-item detail from the commerce connector.
+        columns:
+          - name: order_item_id
+            tests: [not_null]
+          - name: order_id
+            tests: [not_null]
+          - name: product_id
+            tests: [not_null]
+
+      - name: raw_payments
+        description: Payment transactions from the payments connector.
+        columns:
+          - name: payment_id
+            tests: [not_null]
+          - name: order_id
+            tests: [not_null]
+
+      - name: raw_refunds
+        description: Refund records from the payments connector.
+        columns:
+          - name: refund_id
+            tests: [not_null]
+
+      - name: raw_inventory
+        description: Daily inventory snapshots.
+        columns:
+          - name: inventory_id
+            tests: [not_null]
+
+      - name: raw_shipments
+        description: Shipment records from the fulfillment connector.
+        columns:
+          - name: shipment_id
+            tests: [not_null]
+          - name: order_id
+            tests: [not_null]
+
+      - name: raw_ad_spend
+        description: Ad spend data from advertising connectors.
+        columns:
+          - name: ad_record_id
+            tests: [not_null]
+
+      - name: raw_payouts
+        description: Platform payout records.
+        columns:
+          - name: payout_id
+            tests: [not_null]

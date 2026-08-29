@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "dataniks-analytics-platform"
+version = "0.1.0"
+description = "DataNiks Unified Analytics Platform — NovaCommerce demonstration"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+  {name = "DataNiks LLC", email = "rahul.nikam1907@gmail.com"},
+]
+
+[project.scripts]
+data-generator = "data_generator.__main__:main"
+dap-quality    = "data_quality.__main__:main"
+dap-ai         = "ai.assistant.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
